@@ -6,7 +6,7 @@ from rest_framework import serializers
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'email']
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -16,6 +16,16 @@ class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('email', 'username', 'password')  # Include password as a field
+
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        return value
 
     def create(self, validated_data):
         # Remove the password from the validated data and hash it

@@ -1,3 +1,4 @@
+from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,6 +13,11 @@ from django_ratelimit.decorators import ratelimit
 
 
 class UserSignupView(APIView):
+    """
+    API endpoint for user registration.
+    Allows users to sign up by providing their email, username, and password.
+    """
+
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
         if serializer.is_valid():
@@ -21,8 +27,13 @@ class UserSignupView(APIView):
 
 
 class UserLoginView(APIView):
+    """
+    API endpoint for user login.
+    Users can log in using their email and password. The response includes JWT access and refresh tokens.
+    """
+
     def post(self, request):
-        email = request.data.get('email', '').lower()  # Ensure email is case-insensitive
+        email = request.data.get('email', '').lower()  # Ensures email is case-insensitive
         password = request.data.get('password', '')
         user = authenticate(email=email, password=password)
         if user:
@@ -30,12 +41,16 @@ class UserLoginView(APIView):
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-            },                                      status=status.HTTP_200_OK)
+            }, status=status.HTTP_200_OK)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class UserSearchView(APIView):
-    permission_classes = [IsAuthenticated]  # Ensure authenticated access
+    """
+    API endpoint for searching users by email or username.
+    Only authenticated users can access this endpoint. Search is case-insensitive and supports pagination.
+    """
+    permission_classes = [IsAuthenticated]  # Ensures that only authenticated users can access this view
 
     class UserPagination(PageNumberPagination):
         page_size = 10
@@ -53,18 +68,19 @@ class UserSearchView(APIView):
         return Response({'error': 'Query is required'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
 class SendFriendRequestView(APIView):
+    """
+    API endpoint for sending friend requests.
+    Users can send friend requests to other users by providing the receiver's ID. Rate-limited to 3 requests per minute.
+    """
     permission_classes = [IsAuthenticated]
 
-    @ratelimit(key='user', rate='3/m', method='POST', block=True)
+    @method_decorator(ratelimit(key='user', rate='3/m', block=True))
     def post(self, request):
         sender = request.user
         receiver_id = request.data.get('receiver_id')
         try:
             receiver = CustomUser.objects.get(id=receiver_id)
-            # Create a friend request if it doesn’t exist
             friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver,
                                                                           status='pending')
             if created:
@@ -76,11 +92,15 @@ class SendFriendRequestView(APIView):
 
 
 class AcceptFriendRequestView(APIView):
+    """
+    API endpoint for accepting friend requests.
+    Users can accept friend requests directed to them. The friend request's status is changed to 'accepted'.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request, friend_request_id):
         try:
-            friend_request = FriendRequest.objects.get(id=friend_request_id, receiver=request.user)
+            friend_request = FriendRequest.objects.get(id=friend_request_id, receiver=request.user, status='pending')
             friend_request.status = 'accepted'
             friend_request.save()
             return Response({'message': 'Friend request accepted'}, status=status.HTTP_200_OK)
@@ -89,6 +109,10 @@ class AcceptFriendRequestView(APIView):
 
 
 class RejectFriendRequestView(APIView):
+    """
+    API endpoint for rejecting friend requests.
+    Users can reject friend requests directed to them, changing the request's status to 'rejected'.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request, friend_request_id):
@@ -102,24 +126,31 @@ class RejectFriendRequestView(APIView):
 
 
 class ListFriendsView(APIView):
+    """
+    API endpoint for listing all friends.
+    Lists all users who have an accepted friend request with the logged-in user.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         friends = FriendRequest.objects.filter(
             (Q(sender=request.user) | Q(receiver=request.user)) & Q(status='accepted')
         )
-        friends_list = [
-            friend.sender if friend.receiver == request.user else friend.receiver
-            for friend in friends
-        ]
+        friends_list = [friend.sender if friend.receiver == request.user else friend.receiver for friend in friends]
         serializer = CustomUserSerializer(friends_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ListPendingFriendRequestsView(APIView):
+    """
+    API endpoint for listing pending friend requests.
+    Lists all pending friend requests directed to the logged-in user,
+    optimizing query performance by pre-fetching senders.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        pending_requests = FriendRequest.objects.filter(receiver=request.user, status='pending')
+        pending_requests = FriendRequest.objects.filter(receiver=request.user, status='pending').select_related(
+            'sender')
         serializer = CustomUserSerializer([req.sender for req in pending_requests], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

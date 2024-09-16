@@ -1,0 +1,249 @@
+{
+	"info": {
+		"_postman_id": "82964acd-5ad0-40ea-8914-1185bbbe6d48",
+		"name": "Social Network",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27020631",
+		"_collection_link": "https://universal-shadow-134425.postman.co/workspace/SpacePe~f3082a89-f565-4ea6-84ba-64b15979c8b8/collection/27020631-82964acd-5ad0-40ea-8914-1185bbbe6d48?action=share&source=collection_link&creator=27020631"
+	},
+	"item": [
+		{
+			"name": "signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/social/signup/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"social",
+						"signup",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "anup321",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "anup",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"sakib@gmail.com\",\r\n  \"password\": \"sakib123\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/login/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search by name/email",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "send friend request",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2NDcwMzUwLCJpYXQiOjE3MjY0NzAwNTAsImp0aSI6ImUwN2U4NDM4MTRlNjQ3YmQ5YTJkM2YzZjJhNTFlZmFjIiwidXNlcl9pZCI6MTR9.cRa0KWFFCHDywcMX-IOyeBqIVERJPK9VA_36KmktSQw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"receiver_id\": 1 \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/friends/send/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"friends",
+						"send",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "accept friend request",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI2NDcyODI0LCJpYXQiOjE3MjY0NzI1MjQsImp0aSI6IjNjYzE0NDBmYTQzZDQ0ODA5ZDJkMjYzYzAyNDI5ZTAxIiwidXNlcl9pZCI6MTV9.AwR8hGUOiTIClRLMDSl7lB2aLE3Cqsa7F6fbGYQ46dU",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/friends/accept/<int:id>/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"friends",
+						"accept",
+						"<int:id>",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "reject friend request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/friends/reject/<int:id>/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"friends",
+						"reject",
+						"<int:id>",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetch friend list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/friends/list/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"friends",
+						"list",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetch pending friend request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/friends/pending/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"friends",
+						"pending",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000/social/",
+			"type": "string"
+		}
+	]
+}
